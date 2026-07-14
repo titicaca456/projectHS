@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>«한산» VR — 제작 스케줄 · 이행율 대시보드</title>
+<meta name="description" content="«한산» VR 이머시브 공간 전시 콘텐츠 · 7–9월 제작 스케줄 + 목표 대비 이행율 PM 대시보드">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ================= 토큰 ================= */
+:root{
+  --paper:#fdfcfa;
+  --panel:#ffffff;
+  --panel2:#f5f3ee;
+  --line:#e5e1d8;
+  --line-soft:#efece5;
+  --text:#26221c;
+  --muted:#6b645a;
+  --dim:#9a938a;
+  --brass:#a9772a;      /* 공간 모델링 */
+  --red:#b23a2e;        /* 오늘·마감임박 */
+  --jade:#2f7d5f;       /* 통합·검증 */
+  --steel:#3a6b93;      /* 연출·캐릭터·민화 */
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  background:var(--paper);
+  color:var(--text);
+  letter-spacing:-.01em;
+  line-height:1.55;
+}
+.wrap{max-width:1200px;margin:0 auto;padding:0 26px 60px}
+
+/* ================= 헤더 ================= */
+header{padding:36px 0 22px;position:relative}
+header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,var(--brass),rgba(169,119,42,.25) 40%,var(--line) 75%,transparent)}
+.eyebrow{color:var(--brass);font-size:12px;font-weight:600;letter-spacing:.42em;margin-bottom:10px}
+.hd-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+h1{font-family:'Noto Serif KR',serif;font-weight:900;font-size:clamp(28px,4vw,42px);line-height:1.15;letter-spacing:-.02em}
+h1 .thin{font-weight:600;color:var(--muted);font-size:.6em;letter-spacing:0}
+.hd-sub{color:var(--muted);font-size:14px;margin-top:8px}
+.hd-meta{text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.badge{display:inline-block;font-size:11px;font-weight:700;color:var(--brass);
+  border:1px solid rgba(169,119,42,.45);border-radius:999px;padding:4px 12px;letter-spacing:.1em}
+.today-label{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.today-label b{color:var(--text);font-weight:700}
+
+/* ================= 페이즈 스트립 ================= */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:24px 0 0;
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.phase{padding:18px 18px 16px;position:relative;border-left:1px solid var(--line-soft)}
+.phase:first-child{border-left:none}
+.phase::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc,var(--line))}
+.phase .p-step{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--pc,var(--muted));margin-bottom:6px;
+  display:flex;align-items:center;gap:7px}
+.phase .p-step::before{content:'';width:8px;height:8px;background:var(--pc,var(--dim));transform:rotate(45deg);border-radius:1.5px;flex:none}
+.phase .p-title{font-size:15px;font-weight:800;line-height:1.3;margin-bottom:5px}
+.phase .p-desc{font-size:12px;color:var(--muted);line-height:1.55}
+.phase .p-date{font-size:12px;font-weight:800;color:var(--pc,var(--text));margin-top:8px;font-variant-numeric:tabular-nums}
+.phase.now{background:linear-gradient(180deg,rgba(169,119,42,.06),transparent)}
+.phase .p-now{position:absolute;top:12px;right:14px;font-size:10px;font-weight:800;color:#fff;background:var(--red);
+  border-radius:999px;padding:2px 9px;letter-spacing:.08em}
+
+/* ================= KPI ================= */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0 4px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px 14px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,var(--line))}
+.kpi .k-label{font-size:11.5px;color:var(--muted);letter-spacing:.12em;font-weight:700;margin-bottom:7px}
+.kpi .k-value{font-size:29px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;color:var(--kc,var(--text))}
+.kpi .k-value small{font-size:14px;font-weight:600;color:var(--muted);margin-left:5px;letter-spacing:0}
+.kpi .k-sub{font-size:12px;color:var(--dim);margin-top:7px}
+.kpi .k-sub b{color:var(--muted);font-weight:700}
+
+/* ================= 카드 공통 ================= */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-top:16px;
+  box-shadow:0 1px 4px rgba(38,34,28,.05)}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.sec-title{font-size:16px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.sec-title::before{content:'';width:9px;height:9px;background:var(--brass);border-radius:2px;transform:rotate(45deg);flex:none}
+.sec-note{font-size:12px;color:var(--dim)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{width:14px;height:8px;border-radius:3px;display:inline-block}
+.lg.model{background:var(--brass)}
+.lg.char{background:var(--steel)}
+.lg.integ{background:var(--jade)}
+.lg.tbd{border:1px dashed var(--dim);background:transparent}
+
+/* ================= 목표 대비 이행율 ================= */
+.pf-ahead{color:var(--steel)} .pf-ontrack{color:var(--jade)} .pf-warn{color:var(--brass)} .pf-behind{color:var(--red)}
+.perf-top{display:grid;grid-template-columns:230px 1fr;gap:26px;align-items:center}
+.perf-hero{border-right:1px solid var(--line-soft);padding-right:22px}
+.ph-label{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.1em}
+.ph-hint{color:var(--dim);font-weight:600;letter-spacing:0}
+.ph-value{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--brass);margin:6px 0 8px}
+.ph-delta{font-size:13.5px;font-weight:800}
+.perf-bar{position:relative;height:28px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);overflow:visible}
+.perf-fill{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,var(--brass),#c99a4d);border-radius:9px 0 0 9px;transition:width .3s}
+.perf-plan{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--red);z-index:2}
+.perf-plan::after{content:'계획';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:800;color:var(--red);white-space:nowrap}
+.perf-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);margin-top:7px}
+.perf-meta{font-size:12.5px;color:var(--muted);margin-top:9px;line-height:1.5}
+.perf-meta b{color:var(--text);font-weight:800;font-variant-numeric:tabular-nums}
+.perf-tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-soft)}
+.ptrk-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:700;margin-bottom:7px}
+.ptrk-top>span:first-child{color:var(--text)}
+.ptrk-delta{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+.ptrk-delta small{color:var(--dim);font-weight:600}
+.ptrk-na{color:var(--dim);font-weight:600}
+.ptrk-bar{position:relative;height:12px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);overflow:visible}
+.ptrk-fill{position:absolute;top:0;bottom:0;left:0;background:var(--brass);border-radius:6px 0 0 6px}
+.ptrk-plan{position:absolute;top:-2px;bottom:-2px;width:0;border-left:1.5px dashed var(--red);z-index:2}
+.perf-actions{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+.perf-reset{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer}
+.perf-reset:hover{color:var(--red);border-color:var(--red)}
+.perf-note{font-size:11.5px;color:var(--dim)}
+@media (max-width:640px){.perf-top{grid-template-columns:1fr}.perf-hero{border-right:none;border-bottom:1px solid var(--line-soft);padding-right:0;padding-bottom:14px}}
+
+/* ================= 간트차트 ================= */
+.g-scroll{overflow-x:auto;padding-bottom:6px}
+.g-inner{min-width:980px;padding-top:44px}
+.g-head{display:grid;grid-template-columns:300px 1fr;position:relative}
+.g-axis{position:relative;height:52px;border-bottom:2px solid var(--line)}
+.g-axis-side{align-self:end;padding:0 10px 8px 4px;font-size:11px;color:var(--dim);letter-spacing:.14em;font-weight:700;
+  border-bottom:2px solid var(--line)}
+.g-month{position:absolute;top:2px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.24em}
+.g-tick{position:absolute;top:28px;transform:translateX(-50%);font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums}
+.g-msdia{position:absolute;top:-16px;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:var(--brass);border-radius:1.5px}
+.g-msdate{position:absolute;top:-40px;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--brass);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.g-body{position:relative}
+.g-bg{position:absolute;top:0;bottom:0;left:300px;right:0;pointer-events:none;z-index:0}
+.g-weekend{position:absolute;top:0;bottom:0;background:rgba(38,34,28,.035)}
+.g-mline{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.g-msline{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(169,119,42,.5)}
+.g-tline{position:absolute;top:0;bottom:0;width:0;border-left:2px solid var(--red);z-index:5}
+.g-tchip{position:absolute;top:6px;transform:translateX(-50%);font-size:10.5px;font-weight:800;color:#fff;
+  background:var(--red);border-radius:999px;padding:2px 9px;white-space:nowrap;z-index:6}
+
+.g-group{display:grid;grid-template-columns:300px 1fr;position:relative;z-index:1;background:var(--panel2)}
+.g-group>div:first-child{padding:9px 10px 8px 4px;font-size:11.5px;font-weight:800;color:var(--brass);letter-spacing:.1em}
+.g-group>div:last-child{border-left:1px solid var(--line-soft)}
+
+.g-row{display:grid;grid-template-columns:300px 1fr;align-items:center;border-top:1px solid var(--line-soft);position:relative;z-index:1;min-height:46px}
+.g-row:hover{background:rgba(169,119,42,.03)}
+.g-label{padding:7px 12px 7px 4px;display:flex;flex-direction:column;gap:4px}
+.g-name{font-size:12.5px;font-weight:700;line-height:1.3}
+.g-name.sub{padding-left:14px;color:var(--muted);font-weight:600;font-size:12px}
+.g-sub{font-size:10.5px;color:var(--dim);display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.g-track{position:relative;height:46px;border-left:1px solid var(--line-soft)}
+.bar{position:absolute;top:50%;transform:translateY(-50%);height:16px;border-radius:5px;
+  background:var(--bc);opacity:.92}
+.bar.dashedbar{background:rgba(169,119,42,.08);border:1.5px dashed var(--bc);opacity:1}
+.bar.tbdbar{background:transparent;border:1.5px dashed var(--dim)}
+.bar .fill{position:absolute;top:0;bottom:0;left:0;border-radius:5px;background:rgba(255,255,255,.45);transition:width .3s}
+.bar-dates{position:absolute;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:var(--muted);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.gantt-plan{position:absolute;top:50%;transform:translateY(-50%);height:22px;width:0;border-left:1.5px dashed var(--red);z-index:3}
+.mstone-pt{position:absolute;top:50%;width:11px;height:11px;background:var(--bc);transform:translate(-50%,-50%) rotate(45deg);border-radius:2px}
+
+/* ================= 칩 ================= */
+.chip{font-size:10px;font-weight:700;padding:1.5px 8px;border-radius:999px;border:1px solid;white-space:nowrap;font-variant-numeric:tabular-nums}
+.st-run{color:var(--jade);border-color:rgba(47,125,95,.5);background:rgba(47,125,95,.08)}
+.st-wait{color:var(--muted);border-color:var(--line)}
+.st-due{color:var(--red);border-color:rgba(178,58,46,.55);background:rgba(178,58,46,.08)}
+.st-done{color:var(--dim);border-color:var(--line-soft);background:var(--panel2)}
+.st-check{color:var(--brass);border-color:rgba(169,119,42,.55);border-style:dashed;background:rgba(169,119,42,.06)}
+.st-tbd{color:var(--dim);border-color:var(--line);border-style:dashed}
+.st-hold{color:var(--brass);border-color:rgba(169,119,42,.45);background:rgba(169,119,42,.07)}
+.own{color:var(--steel);border-color:rgba(58,107,147,.5);background:rgba(58,107,147,.07)}
+
+/* ================= 핵심 마감 그리드 ================= */
+.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
+.ms-card{border:1px solid rgba(169,119,42,.35);background:rgba(169,119,42,.045);border-radius:10px;
+  padding:11px 13px;display:flex;flex-direction:column;gap:7px}
+.ms-card.passed{opacity:.55}
+.ms-label{font-size:12.5px;font-weight:700;line-height:1.35}
+.ms-when{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.ms-when b{font-size:13px;font-weight:800;color:var(--brass);font-variant-numeric:tabular-nums}
+
+/* ================= 상세 보드 ================= */
+details.trk{border:1px solid var(--line);border-radius:12px;margin-top:10px;background:var(--panel);overflow:hidden}
+details.trk[open]{padding-bottom:14px}
+details.trk summary{cursor:pointer;list-style:none;padding:13px 16px;display:flex;align-items:center;gap:10px;
+  font-size:13.5px;font-weight:800;color:var(--text);background:var(--panel2)}
+details.trk summary::-webkit-details-marker{display:none}
+details.trk summary::before{content:'▸';color:var(--brass);font-size:13px;transition:transform .15s}
+details.trk[open] summary::before{transform:rotate(90deg)}
+details.trk summary .cnt{font-size:11px;font-weight:700;color:var(--dim);margin-left:auto}
+.task-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;padding:14px 14px 0}
+.task-card{border:1px solid var(--line);border-radius:11px;padding:13px 14px 12px;background:var(--panel);
+  position:relative;overflow:hidden;display:flex;flex-direction:column}
+.task-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tc,var(--line))}
+.task-card.model{--tc:var(--brass)} .task-card.char{--tc:var(--steel)}
+.task-card.integ{--tc:var(--jade)} .task-card.tbd{--tc:var(--dim)}
+.task-card.subcard{background:var(--panel2);border-left:2px dashed rgba(169,119,42,.45)}
+.task-card.subcard .task-name{color:var(--muted)}
+.task-name{font-size:13px;font-weight:700;line-height:1.35;margin-bottom:7px}
+.task-top{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.task-date{display:inline-flex;align-items:baseline;gap:5px;font-size:12px;font-weight:800;
+  font-variant-numeric:tabular-nums;color:var(--text);background:var(--panel2);
+  border:1px solid var(--line);border-radius:7px;padding:3px 9px;width:fit-content}
+.task-date .sep{color:var(--dim);font-weight:400;font-size:10.5px}
+.task-date.model{border-color:rgba(169,119,42,.45);background:rgba(169,119,42,.06)}
+.task-date.char{border-color:rgba(58,107,147,.4);background:rgba(58,107,147,.05)}
+.task-date.integ{border-color:rgba(47,125,95,.4);background:rgba(47,125,95,.05)}
+.task-date.tbddate{border-style:dashed;color:var(--dim);background:transparent;font-weight:600}
+.task-note{margin-top:7px;font-size:11px;color:var(--dim);line-height:1.55}
+
+/* 작업별 진척도 편집 */
+.prog-ctl{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line-soft)}
+.prog-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.prog-head-l{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted)}
+.prog-chip{font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:999px;border:1px solid currentColor}
+.prog-val{font-variant-numeric:tabular-nums;font-size:14px;font-weight:800;color:var(--brass)}
+.prog-range{width:100%;accent-color:var(--brass);cursor:pointer;margin:2px 0 8px}
+.prog-presets{display:flex;gap:5px;flex-wrap:wrap}
+.prog-presets button{font-size:10.5px;font-weight:700;color:var(--muted);background:var(--panel2);
+  border:1px solid var(--line);border-radius:6px;padding:3px 9px;cursor:pointer;font-variant-numeric:tabular-nums}
+.prog-presets button:hover{border-color:var(--brass);color:var(--brass)}
+.prog-derived{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line-soft);
+  font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.prog-derived b{font-variant-numeric:tabular-nums;font-size:13px}
+.prog-na{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line-soft);font-size:10.5px;color:var(--dim)}
+
+/* ================= 규칙·리스크·담당 ================= */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-top:16px}
+.grid2 .card{margin-top:0}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.step{flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:700;
+  background:var(--panel2);display:flex;flex-direction:column;gap:2px}
+.step small{font-size:10.5px;font-weight:600;color:var(--dim)}
+.arrow{align-self:center;color:var(--brass);font-weight:800}
+.rules{list-style:none;display:flex;flex-direction:column;gap:8px}
+.rules li{display:flex;gap:9px;font-size:12.5px;align-items:flex-start;line-height:1.5}
+.rules small{display:block;color:var(--dim);font-size:11px}
+.mk{flex:none;width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:1px}
+.mk.ok{background:rgba(47,125,95,.12);color:var(--jade)}
+.mk.no{background:rgba(178,58,46,.1);color:var(--red)}
+.risk{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line-soft);font-size:12.5px;line-height:1.5}
+.risk:first-of-type{border-top:none}
+.risk small{display:block;color:var(--dim);font-size:11px}
+.r-dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px}
+.r-hi{background:var(--red)} .r-md{background:var(--brass)} .r-lo{background:var(--jade)}
+.asset{display:flex;gap:11px;padding:10px 0;border-top:1px solid var(--line-soft);align-items:flex-start}
+.asset:first-of-type{border-top:none}
+.a-tag{flex:none;font-size:10px;font-weight:800;border-radius:7px;padding:3px 8px;margin-top:2px;letter-spacing:.04em}
+.a-buy{background:rgba(47,125,95,.1);color:var(--jade)}
+.a-box{background:rgba(58,107,147,.1);color:var(--steel)}
+.a-new{background:rgba(169,119,42,.12);color:var(--brass)}
+.a-tbd{background:rgba(154,147,138,.15);color:var(--muted)}
+.a-body b{font-size:13px}
+.a-body p{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+
+/* ================= 월별 요약 ================= */
+.months{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:16px}
+.month-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.month-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mc)}
+.m-num{font-family:'Noto Serif KR',serif;font-size:21px;font-weight:900;color:var(--mc);margin-bottom:2px}
+.m-title{font-size:13.5px;font-weight:800;margin-bottom:7px}
+.m-goal{font-size:11.5px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:7px 10px;margin-bottom:10px;line-height:1.5}
+.m-list{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:1.5}
+.m-list li{padding-left:14px;position:relative}
+.m-list li::before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;background:var(--mc);transform:rotate(45deg);border-radius:1px}
+.m-list li.ghost{color:var(--dim)}
+.m-list li.ghost::before{background:var(--line)}
+
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line-soft);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+footer b{color:var(--muted);font-weight:600}
+
+@media (max-width:900px){
+  .phases{grid-template-columns:repeat(2,1fr)}
+  .phase{border-top:1px solid var(--line-soft)}
+}
+@media (max-width:760px){
+  .wrap{padding:0 16px 48px}
+  .hd-meta{align-items:flex-start;text-align:left}
+  .phases{grid-template-columns:1fr}
+}
+@media print{
+  @page{margin:11mm}
+  html,body{background:#fff !important}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:100%;padding:0}
+  .card,.kpi,.month-card,.risk,.asset,.task-card,.ms-card,.phase{break-inside:avoid}
+  .g-scroll{overflow:visible}
+  .g-inner{min-width:0}
+  details.trk{break-inside:avoid}
+  .prog-range,.prog-presets,.perf-actions{display:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= 헤더 ================= -->
+  <header>
+    <div class="eyebrow">閑山 · 이머시브 공간 전시 콘텐츠</div>
+    <div class="hd-row">
+      <div>
+        <h1>«한산» VR <span class="thin">제작 스케줄 · 이행율 대시보드</span></h1>
+        <p class="hd-sub">7월 제작 → 8월 통합 → 9월 마무리 → <b style="color:var(--brass)">10월 PICO 글로벌 B2B 스토어 등록</b></p>
+      </div>
+      <div class="hd-meta">
+        <span class="badge">v5.0 · 이행율 추적</span>
+        <span class="today-label">기준일 <b id="todayLabel">—</b> · 열람 시점 자동 갱신</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= ① 전체 흐름 (페이즈) ================= -->
+  <section class="phases" id="phases">
+    <div class="phase" style="--pc:var(--brass)" data-s="2026-07-06" data-e="2026-07-31">
+      <div class="p-step">PHASE 1 · 7월</div>
+      <div class="p-title">1차 제작</div>
+      <div class="p-desc">공간 모델링(S1·S2 시리즈) · 판타지씬 · 용 모델링 · 연출 준비</div>
+      <div class="p-date">7/6 – 7/31</div>
+    </div>
+    <div class="phase" style="--pc:var(--jade)" data-s="2026-08-01" data-e="2026-08-15">
+      <div class="p-step">PHASE 2 · 8월 초</div>
+      <div class="p-title">씬 통합 시작</div>
+      <div class="p-desc">전체 씬 배치(~8/31) · 유니티 테스트 개시 + 2차 모델링(~8/14) 병행</div>
+      <div class="p-date">8/1 – 8/15</div>
+    </div>
+    <div class="phase" style="--pc:var(--steel)" data-s="2026-08-16" data-e="2026-09-15">
+      <div class="p-step">PHASE 3 · 8월 말–9월</div>
+      <div class="p-title">마무리 · 보강</div>
+      <div class="p-desc">3차 모델링 완료(8/28) · 추가 민화 텍스쳐(안) ~9/11 · 유니티 검증 ~9/15</div>
+      <div class="p-date">8/17 – 9/15</div>
+    </div>
+    <div class="phase" style="--pc:var(--red)" data-s="2026-10-01" data-e="2026-10-31">
+      <div class="p-step">GOAL · 10월</div>
+      <div class="p-title">출시</div>
+      <div class="p-desc">PICO 글로벌 B2B 스토어 심사·등록 — 72 FPS · 씬당 100만 tri 이하</div>
+      <div class="p-date">10월 중</div>
+    </div>
+  </section>
+
+  <!-- ================= ② KPI ================= -->
+  <section class="kpis">
+    <div class="kpi" style="--kc:var(--brass)">
+      <div class="k-label">1차 모델링 마감</div>
+      <div class="k-value" id="kd1">—</div>
+      <div class="k-sub"><b>7/31(금)</b> · S1 · S2 시리즈 · S3-1 · 용 모델링</div>
+    </div>
+    <div class="kpi" style="--kc:var(--jade)">
+      <div class="k-label">씬 통합 시작</div>
+      <div class="k-value" id="kd2">—</div>
+      <div class="k-sub"><b>8/1(토)</b> · 씬 배치 8/1~8/31 · 유니티 테스트 ~9/15</div>
+    </div>
+    <div class="kpi" style="--kc:var(--steel)">
+      <div class="k-label">2차 모델링 마감</div>
+      <div class="k-value" id="kd3">—</div>
+      <div class="k-sub"><b>8/14(금)</b> · S3-2 판옥선 · S6 거북선 내부</div>
+    </div>
+    <div class="kpi" style="--kc:var(--steel)">
+      <div class="k-label">3차 모델링 마감</div>
+      <div class="k-value" id="kd4">—</div>
+      <div class="k-sub"><b>8/28(금)</b> · S4 · S5 · S6-2 · S7 · S8</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="k-label">성능 목표 (PICO)</div>
+      <div class="k-value">72<small>FPS · ≤100만 tri/씬</small></div>
+      <div class="k-sub">로우폴 · 베벨✕ · 서브디비전✕ · 8월 유니티 실측</div>
+    </div>
+  </section>
+
+  <!-- ================= ②-b 목표 대비 이행율 ================= -->
+  <section class="card" id="perfCard">
+    <div class="sec-head">
+      <div class="sec-title">목표 대비 이행율</div>
+      <span class="sec-note">아래 <b>작업 상세</b>에서 각 작업의 실제 완료도를 입력하면 자동 집계 · 입력값은 브라우저에 저장</span>
+    </div>
+    <div class="perf-top">
+      <div class="perf-hero">
+        <div class="ph-label">전체 이행율 <span class="ph-hint">(기간 가중)</span></div>
+        <div class="ph-value" id="perfActual">—</div>
+        <div class="ph-delta" id="perfDelta">—</div>
+      </div>
+      <div>
+        <div class="perf-bar">
+          <div class="perf-fill" id="perfFill" style="width:0%"></div>
+          <div class="perf-plan" id="perfPlan" style="left:0%" title="오늘까지 계획된 예상 진척"></div>
+        </div>
+        <div class="perf-scale"><span>0%</span><span>100%</span></div>
+        <div class="perf-meta" id="perfMeta">—</div>
+      </div>
+    </div>
+    <div class="perf-tracks" id="perfTracks"></div>
+    <div class="perf-actions">
+      <button type="button" id="perfReset" class="perf-reset">진척도 초기화</button>
+      <span class="perf-note" id="perfCount">—</span>
+    </div>
+  </section>
+
+  <!-- ================= ③ 간트차트 ================= -->
+  <section class="card">
+    <div class="sec-head">
+      <div class="sec-title">제작 타임라인 <span style="font-weight:500;color:var(--dim);font-size:13px">2026.07 – 09</span></div>
+      <div class="legend">
+        <span><i class="lg model"></i>공간 모델링</span>
+        <span><i class="lg char"></i>연출·캐릭터·민화</span>
+        <span><i class="lg integ"></i>통합·검증</span>
+        <span><i class="lg tbd"></i>미정·조건부</span>
+        <span style="color:var(--brass);font-weight:700">◆ 핵심 마감</span>
+      </div>
+    </div>
+    <div class="g-scroll">
+      <div class="g-inner">
+        <div class="g-head">
+          <div class="g-axis-side">트랙 / 작업</div>
+          <div class="g-axis" id="gAxis"></div>
+        </div>
+        <div class="g-body" id="gBody">
+          <div class="g-bg" id="gBg"></div>
+          <div id="gRows"></div>
+        </div>
+      </div>
+    </div>
+    <p class="sec-note" style="margin-top:12px">
+      막대 안 밝은 부분 = <b>실제 이행율(입력값)</b> · 막대 위 붉은 점선(┆) = 오늘까지 계획된 예상 진척 · 점선 막대 = 조건부/미정 ·
+      ◆(작은 다이아) = 단일일 작업 · 붉은 세로선 = 오늘 · 상단 다이아·날짜 = 핵심 마감.
+    </p>
+  </section>
+
+  <!-- ================= ④ 핵심 마감 일정 ================= -->
+  <section class="card">
+    <div class="sec-head">
+      <div class="sec-title">핵심 마감 일정</div>
+      <span class="sec-note">가까운 순 정렬 · D-day 자동 계산</span>
+    </div>
+    <div class="ms-grid" id="msGrid"></div>
+  </section>
+
+  <!-- ================= ⑤ 작업 상세 (트랙별) ================= -->
+  <section class="card" style="padding-bottom:16px">
+    <div class="sec-head" style="margin-bottom:4px">
+      <div class="sec-title">작업 상세 <span style="font-weight:500;color:var(--dim);font-size:13px">— 진척도 입력</span></div>
+      <span class="sec-note">트랙 제목을 누르면 펼침/접힘 · 각 카드의 슬라이더/버튼으로 실제 이행율 입력</span>
+    </div>
+    <div id="board"></div>
+  </section>
+
+  <!-- ================= ⑥ 규칙 · 에셋 · 리스크 · 담당 ================= -->
+  <section class="grid2">
+
+    <article class="card">
+      <div class="sec-head"><div class="sec-title">제작 파이프라인 · 성능 규칙</div></div>
+      <div class="flow">
+        <span class="step">Cinema 4D<small>모델링 제작</small></span><span class="arrow">➜</span>
+        <span class="step">Blender<small>이관(익스포트)</small></span><span class="arrow">➜</span>
+        <span class="step">호환 검수<small>문제없음 확인까지</small></span><span class="arrow">➜</span>
+        <span class="step">Unity<small>8월 씬 테스트</small></span>
+      </div>
+      <ul class="rules">
+        <li><span class="mk ok">✓</span><div>프레임율 <b>72 FPS 이상</b><small>PICO 공식 문서 기준 확인 완료</small></div></li>
+        <li><span class="mk ok">✓</span><div>씬별 메쉬 <b>100만 tri 이하</b> — Unreal·Unity 동일 기준</div></li>
+        <li><span class="mk ok">✓</span><div>씬 조립 시 <b>50만~500만</b> 범위 배치 → 씬별 실측<small>8월 유니티 테스트에서 72 FPS 측정</small></div></li>
+        <li><span class="mk ok">✓</span><div><b>로우폴리</b> 기준 제작</div></li>
+        <li><span class="mk no">✕</span><div><b>베벨(Bevel)</b> 사용 금지</div></li>
+        <li><span class="mk no">✕</span><div><b>서브디비전 서페이스</b> 사용 금지</div></li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="sec-head"><div class="sec-title">캐릭터 · 에셋 특이사항</div></div>
+      <div class="asset">
+        <span class="a-tag a-tbd">방식 미정</span>
+        <div class="a-body"><b>다큐멘터리 감독 (캐릭터)</b><p>제작 방식 미정 — 신규/변형 확정 시 업데이트</p></div>
+      </div>
+      <div class="asset">
+        <span class="a-tag a-box">변형 제작</span>
+        <div class="a-body"><b>기록관 (캐릭터)</b><p>자료조사 진행 중 — 기존 에셋 변형 방식</p></div>
+      </div>
+      <div class="asset">
+        <span class="a-tag a-new">신규 제작</span>
+        <div class="a-body"><b>일본군 갑옷 (캐릭터)</b><p>기존 에셋은 참고용 — 신규 제작</p></div>
+      </div>
+      <div class="asset">
+        <span class="a-tag a-buy">구매</span>
+        <div class="a-body"><b>갈매기</b><p>외부 에셋 구매 — 상업용 라이선스 확인 후 확정 · 씬 배치 전 완료 권장</p></div>
+      </div>
+      <div class="asset">
+        <span class="a-tag a-box">간소화</span>
+        <div class="a-body"><b>왜선</b><p>원거리 배치용 — 민화를 붙일 수 있는 박스 형태 저폴리</p></div>
+      </div>
+      <div class="asset">
+        <span class="a-tag a-new">변환·최적화</span>
+        <div class="a-body"><b>판옥선 모형 (S3-2)</b><p>Maya 에셋 → 변환·최적화 · 움직임 있음 — 8/3~8/15</p></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="sec-head"><div class="sec-title">체크포인트 · 리스크</div></div>
+      <div class="risk"><span class="r-dot r-hi"></span>
+        <p>7/31 <b>1차 마감 동시 진행</b> — S1·S2 시리즈·S3-1·용 모델링<small>담당: 김진일/권은기(S2) · 김대권(S3-1) · 3D 모델러(용) — 주간 물량 점검 권장</small></p></div>
+      <div class="risk"><span class="r-dot r-hi"></span>
+        <p>8월 <b>통합·테스트와 2·3차 모델링 병행</b><small>씬 배치(8/1~31)와 2차(S3-2·S6 ~8/14) · 3차(S4~S8 ~8/28) 모델링이 겹침 — 리소스 배분 조율 필요</small></p></div>
+      <div class="risk"><span class="r-dot r-md"></span>
+        <p><b>스튜디오 전체 공간(S2-1~S3-2)</b> 제작 가능 여부 — ~7/31 확인<small>결과에 따라 잔여 리소스 재배분</small></p></div>
+      <div class="risk"><span class="r-dot r-md"></span>
+        <p><b>용머리 민화 텍스쳐</b> — 채색 8/14 · 추가 작업(안) ~9/11<small>S7 전투(민화 전환)의 선행 조건 — 지연 시 S7 연쇄 지연</small></p></div>
+      <div class="risk"><span class="r-dot r-md"></span>
+        <p><b>S3-2 판옥선</b> Maya 변환 검증 — 8/3~8/15<small>움직임 포함 — 변환 직후 폴리곤·리깅 이상 여부 확인</small></p></div>
+      <div class="risk"><span class="r-dot r-md"></span>
+        <p>모캡 배우 · 클린업/페이셜 · VFX · 음악 <b>담당·일정 미정</b><small>협의 후 확정 필요 — 지연 시 9월 압박</small></p></div>
+      <div class="risk"><span class="r-dot r-lo"></span>
+        <p>성능 최종 관문 <b>72 FPS 실측</b><small>미달 시 LOD·컬링·드로우콜 최적화</small></p></div>
+    </article>
+
+    <article class="card">
+      <div class="sec-head"><div class="sec-title">담당자 요약</div></div>
+      <div class="asset"><span class="a-tag a-new">공간</span>
+        <div class="a-body"><b>김진일 / 권은기</b><p>S2 시리즈 · S3-2 · S4 · S5 · S6-2 · S7 · S8 (공간 모델링 전담)</p></div></div>
+      <div class="asset"><span class="a-tag a-new">공간</span>
+        <div class="a-body"><b>김대권</b><p>S3-1 판타지씬 — 3주 스프린트 (7/13~7/31)</p></div></div>
+      <div class="asset"><span class="a-tag a-new">공간</span>
+        <div class="a-body"><b>백승호</b><p>S6 거북선 내부 씬 제작 (8/10~8/14)</p></div></div>
+      <div class="asset"><span class="a-tag a-new">공간</span>
+        <div class="a-body"><b>이태용</b><p>S1 프롤로그 — 초안 완료</p></div></div>
+      <div class="asset"><span class="a-tag a-box">연출</span>
+        <div class="a-body"><b>김수옥</b><p>애니메틱 v3(7/17) · 용머리 삼면도(7/14) · 모캡 동선·더미 테스트(7/31)</p></div></div>
+      <div class="asset"><span class="a-tag a-box">연출</span>
+        <div class="a-body"><b>유상현 (연출 감독)</b><p>S7 연출·동선(7월) · S6 연출·동선(8/3~8/7)</p></div></div>
+      <div class="asset"><span class="a-tag a-tbd">외부</span>
+        <div class="a-body"><b>3D 모델러 (독립 작업)</b><p>용(머리+몸통) 모델링 · 몸통 AI 텍스쳐링 — ~7/31</p></div></div>
+      <div class="asset"><span class="a-tag a-tbd">미정</span>
+        <div class="a-body"><b>S9 · 모캡 · VFX · 음악</b><p>담당·일정 협의 후 확정</p></div></div>
+    </article>
+
+  </section>
+
+  <!-- ================= ⑦ 월별 요약 ================= -->
+  <section class="months">
+    <div class="month-card" style="--mc:var(--brass)">
+      <div class="m-num">7月</div>
+      <div class="m-title">1차 제작</div>
+      <div class="m-goal">목표 — <b>S1·S2·S3-1·용 모델링 7/31(금) 완료</b> · C4D→Blender 검수</div>
+      <ul class="m-list">
+        <li><b>S1 프롤로그</b> — 초안 완료(이태용)</li>
+        <li><b>스튜디오 전체(S2-1~S3-2)</b> — 가능 여부 ~7/31 확인</li>
+        <li><b>S2-2·3·4</b> — 7/14~7/31 (김진일/권은기)</li>
+        <li><b>S3-1 판타지씬</b> — 3주 스프린트 (김대권)</li>
+        <li><b>용 삼면도(7/14) · 3D 모델링 · 검토(7/31)</b></li>
+        <li><b>애니메틱 v3</b> — 7/17 공유(김수옥)</li>
+        <li><b>모션캡쳐 연출 초안</b> — ~7/16</li>
+        <li><b>S7 민화 텍스처(채색+스캔)</b> — 7/15 시작 · ~8/14</li>
+      </ul>
+    </div>
+    <div class="month-card" style="--mc:var(--jade)">
+      <div class="m-num">8月</div>
+      <div class="m-title">통합 + 2차 제작</div>
+      <div class="m-goal">목표 — <b>2차 모델링 8/14 · 3차 모델링 8/28 · 씬 배치 8/31 완료</b></div>
+      <ul class="m-list">
+        <li><b>중간점검 서류 제출</b> — 8/3(월) 자정 마감 · 문서+사진+영상</li>
+        <li><b>씬 배치·그림잡기·보완</b> — 8/1~8/31</li>
+        <li><b>유니티 테스트·동선·대사·사운드</b> — 8/1~9/15 순차</li>
+        <li><b>S3-2 판옥선</b> — 8/3~8/15</li>
+        <li><b>S6 내부(연출→제작)</b> — 8/3~8/14</li>
+        <li><b>S6-2 거북선 위</b> — 8/17~8/21</li>
+        <li><b>S4+S5 연계 제작</b> — 8/17~8/28</li>
+        <li><b>S7 전투 · S8 절벽</b> — 8/3~8/28</li>
+        <li><b>용머리 민화 채색</b> — ~8/14 완료</li>
+      </ul>
+    </div>
+    <div class="month-card" style="--mc:var(--steel)">
+      <div class="m-num">9月</div>
+      <div class="m-title">보강 · 협의 확정</div>
+      <div class="m-goal">확정 — <b>추가 민화 텍스쳐(안) 9/11 마감</b> · 그 외 협의 중</div>
+      <ul class="m-list">
+        <li><b>용머리 추가 민화 텍스쳐(안)</b> — 8/15~9/11 · 예산·일정 협의</li>
+        <li><b>유니티 테스트·검증 마감</b> — ~9/15</li>
+        <li><b>S9(AI 돔확장 영상)</b> — 담당·일정 협의</li>
+        <li><b>모캡 캐스팅(7/27~) · 클린업 · VFX · 음악</b> — 가안 · 협의 후 확정</li>
+        <li class="ghost">(예시) 72FPS 최적화 · LOD/드로우콜 정리</li>
+        <li class="ghost">(예시) PICO 심사 요건 점검 · 제출 빌드</li>
+      </ul>
+    </div>
+    <div class="month-card" style="--mc:var(--red)">
+      <div class="m-num">10月</div>
+      <div class="m-title">출시</div>
+      <div class="m-goal"><b>PICO 글로벌 B2B 스토어</b> 심사 제출 · 정식 등록</div>
+      <ul class="m-list">
+        <li><b>72 FPS 이상</b> 성능 충족</li>
+        <li><b>씬당 100만 tri 이하</b> 충족</li>
+        <li class="ghost">(예시) 스토어 등록 자료 · 심사 빌드 준비</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span><b>«한산» VR 이머시브 공간 전시</b> · 제작 스케줄 · 이행율 대시보드 v5.0 · 2026.07.14 수정</span>
+    <span>인쇄: Ctrl+P(⌘+P) · "배경 그래픽" 켜기 권장</span>
+  </footer>
+</div>
+
+<script>
+/* =====================================================================
+   ▼ 일정 데이터 — 날짜·이름만 고치면 간트 · D-day · 상태가 자동 갱신
+     날짜 형식: 'YYYY-MM-DD'
+===================================================================== */
+const RANGE = { start: '2026-07-01', end: '2026-09-30' };
+
+const MILESTONES = [
+  { date: '2026-07-14', label: '용머리 삼면도 스케치 전달 (김수옥)' },
+  { date: '2026-07-16', label: '모션캡쳐 연출 초안' },
+  { date: '2026-07-17', label: '애니메틱 v3 공유 (김수옥)' },
+  { date: '2026-07-31', label: '1차 모델링 마감 · 용 3D 검토 · 모캡 동선/더미 테스트' },
+  { date: '2026-08-03', label: '중간점검 서류 제출 마감 (자정) — 작업설명 요약 문서(AI 활용·작업) · 사진 · 영상' },
+  { date: '2026-08-14', label: '2차 모델링 마감 (S3-2·S6) · 용머리 민화 채색 완료' },
+  { date: '2026-08-28', label: '3차 모델링 마감 (S4·S5·S6-2·S7·S8)' },
+  { date: '2026-08-31', label: '전체 씬 배치 완료' },
+  { date: '2026-09-11', label: '추가 민화 텍스쳐 작업(안) 마감' },
+  { date: '2026-09-15', label: '유니티 테스트 · 검증 마감' }
+];
+
+// kind: model(공간) / char(연출·캐릭터·민화) / integ(통합) / tbd(미정)
+const GROUPS = [
+  { title: '씬 제작 — S1 → S9 (씬 순서)', tasks: [
+    { name: 'S1 프롤로그', start:'2026-07-01', end:'2026-07-10', kind:'model', owner:'이태용', note:'초안 완료' },
+    { name: 'S2-1 만남', start:'2026-07-15', end:'2026-07-31', kind:'model', owner:'김진일/권은기', conditional:true, note:'스튜디오 전체(S2-1~S3-2) 제작 가능 여부 ~7/31 확인' },
+    { name: 'S2-2 일본군 본부', start:'2026-07-15', end:'2026-07-26', kind:'model', owner:'김진일/권은기', note:'A트랙 · 2주' },
+    { name: 'S2-3 거북선 설계실', start:'2026-07-14', end:'2026-07-25', kind:'model', owner:'김진일/권은기', note:'B트랙(병행) · 2주' },
+    { name: 'S2-4 조선군 본부 천막', start:'2026-07-26', end:'2026-07-31', kind:'model', owner:'김진일/권은기', note:'A트랙 · ~1주' },
+    { name: 'S3-1 판타지씬', start:'2026-07-13', end:'2026-07-31', kind:'model', owner:'김대권', note:'3주 스프린트' },
+    { name: '1주차 · 스타일 프레임', sub:true, start:'2026-07-13', end:'2026-07-17', kind:'model', owner:'김대권', note:'대표컷 시안 2~3장 · 7/16 1차 피드백(수옥 감독님) · 7/17 최종안+컷리스트+내레이션 큐시트 요청' },
+    { name: '2주차 · 모션그래픽', sub:true, start:'2026-07-20', end:'2026-07-24', kind:'model', owner:'김대권', note:'2D·3D 씬/에셋 세팅 · 7/24 애니메이션 초안 프리뷰 렌더 보고' },
+    { name: '3주차 · 수정 + 유니티 매핑', sub:true, start:'2026-07-27', end:'2026-07-31', kind:'model', owner:'김대권', note:'피드백 반영(7/27) · 7/31 최종 영상+유니티 매핑 완료본' },
+    { name: 'S3-2 판옥선 모형', start:'2026-08-03', end:'2026-08-15', kind:'model', owner:'김진일/권은기', note:'Maya 에셋 → 변환·최적화 · 움직임 있음' },
+    { name: 'S4 순천부 비밀선소', start:'2026-08-17', end:'2026-08-28', kind:'model', owner:'김진일/권은기', note:'덤불 제작 · S5와 이어지는 씬으로 함께 제작' },
+    { name: 'S5 거북선 외부', start:'2026-08-17', end:'2026-08-28', kind:'model', owner:'김진일/권은기', note:'S4와 이어지는 씬으로 함께 제작' },
+    { name: 'S6 거북선 내부', start:'2026-08-03', end:'2026-08-14', kind:'model', note:'연출 → 씬 제작 순차' },
+    { name: '연출·동선', sub:true, start:'2026-08-03', end:'2026-08-07', kind:'char', owner:'유상현' },
+    { name: '씬 제작', sub:true, start:'2026-08-10', end:'2026-08-14', kind:'model', owner:'백승호', note:'김진일/권은기 팀 협업' },
+    { name: 'S6-2 거북선 위', start:'2026-08-17', end:'2026-08-21', kind:'model', owner:'김진일/권은기', note:'해상 원거리 섬 · 배 에셋 교체·배치' },
+    { name: 'S7 전투 — 판옥선 위', start:'2026-08-03', end:'2026-08-28', kind:'model', owner:'김진일/권은기', note:'실사 → 민화풍 씬 전환 · 이순신 모델링 · 캐릭터 애니메이션 · 용 관련은 아래 하위 항목 참고' },
+    { name: '연출·동선', sub:true, start:'2026-07-20', end:'2026-07-31', kind:'char', owner:'유상현', note:'판옥선 위 · 7월 내' },
+    { name: '용머리 삼면도 스케치 전달', sub:true, start:'2026-07-14', end:'2026-07-14', kind:'char', owner:'김수옥', note:'용머리 참고 스케치' },
+    { name: '용(머리+몸통) 3D 모델링', sub:true, start:'2026-07-06', end:'2026-07-31', kind:'model', note:'3D 모델러 독립 작업 · 몸통 AI 텍스쳐링 포함' },
+    { name: '용 3D 산출물 검토 (AI 텍스쳐 확인)', sub:true, start:'2026-07-31', end:'2026-07-31', kind:'model', note:'텍스쳐링 어색한 부분 판단' },
+    { name: '민화 텍스처 — 채색 + 사진 파일(스캔본)', sub:true, start:'2026-07-15', end:'2026-08-14', kind:'char', note:'용머리+삼면도 민화 작업 · S7 선행 작업' },
+    { name: '추가 민화 텍스쳐 작업(안)', sub:true, start:'2026-08-15', end:'2026-09-11', kind:'char', conditional:true, note:'비늘/꼬리/수염 등 부위별 개별 텍스쳐 · 모델링 확인 후 예산·일정 협의' },
+    { name: 'S8 절벽 위', start:'2026-08-10', end:'2026-08-21', kind:'model', owner:'김진일/권은기', note:'절벽·바다 선택 → 배치 · 캐릭터 애니메이션' },
+    { name: 'S9 (AI 돔확장 영상)', start:'2026-08-01', end:'2026-08-31', kind:'tbd', tbd:true, note:'담당·일정 협의 후 확정' }
+  ]},
+  { title: '공통 — 연출 · 캐릭터 · 행정', tasks: [
+    { name: '애니메틱 v3 — 세트장 씬', start:'2026-07-06', end:'2026-07-17', kind:'char', owner:'김수옥', note:'제작 진행 중 · 7/17 공유' },
+    { name: '모션캡쳐 연출 초안', start:'2026-07-07', end:'2026-07-16', kind:'char', note:'초안 완료 목표' },
+    { name: '모캡 동선 기획', start:'2026-07-31', end:'2026-07-31', kind:'char', owner:'김수옥' },
+    { name: '더미모델링 테스트·수정', start:'2026-07-31', end:'2026-07-31', kind:'char', owner:'김수옥' },
+    { name: '캐릭터 제작 — 감독·기록관·일본군 갑옷', start:'2026-07-06', end:'2026-07-31', kind:'char', hold:true, note:'담당자 별도 · 예정' },
+    { name: '중간점검 서류 준비 · 제출', start:'2026-07-27', end:'2026-08-03', kind:'char', note:'8/3(월) 자정 마감 — 작업설명 요약 문서(AI 활용·작업) · 사진 · 영상' }
+  ]},
+  { title: '통합 · 검증 — 8/1 시작', tasks: [
+    { name: '전체 씬 배치 · 그림잡기 · 보완', start:'2026-08-01', end:'2026-08-31', kind:'integ', note:'8월 내 완료' },
+    { name: '유니티 테스트 · 동선 · 대사 · 사운드', start:'2026-08-01', end:'2026-09-15', kind:'integ', note:'완료된 씬부터 순차 적용 · ~9/15 마감' }
+  ]},
+  { title: '협의 중 — 담당·일정 미정 (가안)', tasks: [
+    { name: '모캡 배우 캐스팅 (최대 5명)', start:'2026-07-27', end:'2026-07-31', kind:'tbd', tbd:true },
+    { name: '모캡 클린업 · 페이셜', start:'2026-07-27', end:'2026-08-15', kind:'tbd', tbd:true },
+    { name: 'VFX', start:'2026-07-27', end:'2026-08-30', kind:'tbd', tbd:true },
+    { name: '음악', start:'2026-07-27', end:'2026-08-30', kind:'tbd', tbd:true },
+    { name: '9월 일정', start:'2026-09-01', end:'2026-09-30', kind:'tbd', tbd:true }
+  ]}
+];
+
+/* ============== 계산 유틸 (수정 불필요) ============== */
+const DAY = 86400000;
+const D = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const diff = (a,b) => Math.round((a - b) / DAY);
+const WD = ['일','월','화','수','목','금','토'];
+const pad = n => String(n).padStart(2,'0');
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const t0 = D(RANGE.start), t1 = D(RANGE.end);
+const total = diff(t1, t0) + 1;
+const now = new Date();
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const pct = d => diff(d, t0) / total * 100;
+const mmdd = d => `${d.getMonth()+1}/${d.getDate()}`;
+const fmt = d => `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`;
+
+document.getElementById('todayLabel').textContent =
+  `${today.getFullYear()}.${pad(today.getMonth()+1)}.${pad(today.getDate())} (${WD[today.getDay()]})`;
+
+/* ============== 진척도 저장 (브라우저) ============== */
+const LS_KEY = 'hansanVR_progress_v1';
+let PROG = {};
+try { PROG = JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e){ PROG = {}; }
+function saveProg(){ try { localStorage.setItem(LS_KEY, JSON.stringify(PROG)); } catch(e){} }
+
+/* ============== 전처리: id · 기간 · 부모/자식 ============== */
+const TASK = {};
+GROUPS.forEach((g, gi) => {
+  let parent = null;
+  g.tasks.forEach((t, ti) => {
+    t.id = `g${gi}t${ti}`;
+    t.gi = gi;
+    t.days = diff(D(t.end), D(t.start)) + 1;
+    TASK[t.id] = t;
+    if (t.sub) { if (parent) { (parent.children = parent.children || []).push(t); t._parent = parent; } }
+    else { parent = t; }
+  });
+});
+const hasKids  = t => t.children && t.children.length;
+const excluded = t => t.tbd || t.hold;                 // 집계 제외 (미정·대기)
+const countable = t => !excluded(t) && !hasKids(t);    // 리프·단독 작업만 집계
+const editable = t => countable(t);
+
+/* 실제 이행율(%) — 리프=입력값, 부모=자식 기간가중 평균 */
+function actualOf(t){
+  if (excluded(t)) return null;
+  if (hasKids(t)) {
+    let w = 0, s = 0;
+    t.children.forEach(c => { if (!excluded(c)) { w += c.days; s += (actualOf(c) || 0) * c.days; } });
+    return w ? s / w : 0;
+  }
+  return PROG[t.id] ?? 0;
+}
+/* 계획 예상(%) — 오늘까지 경과 기준 */
+function plannedOf(t){
+  if (excluded(t)) return null;
+  if (hasKids(t)) {
+    let w = 0, s = 0;
+    t.children.forEach(c => { if (!excluded(c)) { w += c.days; s += (plannedOf(c) || 0) * c.days; } });
+    return w ? s / w : 0;
+  }
+  const s = D(t.start), e = D(t.end), len = t.days;
+  if (today < s) return 0;
+  if (today > e) return 100;
+  return clamp((diff(today, s) + 1) / len * 100, 0, 100);
+}
+
+/* 집계: filter(t)로 대상 한정 */
+function aggregate(filter){
+  let w = 0, sA = 0, sP = 0, cnt = 0;
+  GROUPS.forEach(g => g.tasks.forEach(t => {
+    if (!countable(t)) return;
+    if (filter && !filter(t)) return;
+    w += t.days; sA += (actualOf(t) || 0) * t.days; sP += (plannedOf(t) || 0) * t.days; cnt++;
+  }));
+  return { actual: w ? sA / w : 0, planned: w ? sP / w : 0, count: cnt };
+}
+function deltaTag(a, p){
+  const d = a - p;
+  if (d >= 2)   return { d, cls:'pf-ahead',   txt:'선행' };
+  if (d >= -2)  return { d, cls:'pf-ontrack', txt:'정상' };
+  if (d >= -10) return { d, cls:'pf-warn',    txt:'주의' };
+  return { d, cls:'pf-behind', txt:'지연' };
+}
+
+/* ============== 페이즈 NOW 표시 ============== */
+document.querySelectorAll('.phase').forEach(p => {
+  const s = D(p.dataset.s), e = D(p.dataset.e);
+  if (today >= s && today <= e) {
+    p.classList.add('now');
+    const chip = document.createElement('span');
+    chip.className = 'p-now';
+    chip.textContent = 'NOW';
+    p.appendChild(chip);
+  }
+});
+
+/* ============== KPI D-day ============== */
+function dday(el, dateStr){
+  const n = diff(D(dateStr), today);
+  el.textContent = n > 0 ? `D-${n}` : (n === 0 ? 'D-DAY' : `+${-n}일 경과`);
+}
+dday(document.getElementById('kd1'), '2026-07-31');
+dday(document.getElementById('kd2'), '2026-08-01');
+dday(document.getElementById('kd3'), '2026-08-14');
+dday(document.getElementById('kd4'), '2026-08-28');
+
+/* ============== 상태 계산 ============== */
+function status(t, s, e){
+  if (t.hold) return { cls:'st-hold', txt:'대기중' };
+  if (t.tbd) return { cls:'st-tbd', txt:'협의 후 확정' };
+  if (t.conditional) return { cls:'st-check', txt:`확인 필요 · ~${mmdd(e)}` };
+  if (today < s) return { cls:'st-wait', txt:`예정 · ${mmdd(s)} 시작 (D-${diff(s,today)})` };
+  if (today > e) return { cls:'st-done', txt:`종료 · ${mmdd(e)} 마감` };
+  const left = diff(e, today);
+  if (left <= 3) return { cls:'st-due', txt: left === 0 ? `마감 D-DAY (${mmdd(e)})` : `마감 D-${left} (${mmdd(e)})` };
+  return { cls:'st-run', txt:`진행중 · ~${mmdd(e)} 마감` };
+}
+const KC = { model:'var(--brass)', char:'var(--steel)', integ:'var(--jade)', tbd:'var(--dim)' };
+
+/* ============== 간트: 축 ============== */
+const axis = document.getElementById('gAxis');
+let cur = new Date(t0);
+while (cur <= t1) {
+  const mStart = new Date(cur.getFullYear(), cur.getMonth(), 1);
+  const mEnd = new Date(cur.getFullYear(), cur.getMonth()+1, 0);
+  const s = mStart < t0 ? t0 : mStart, e = mEnd > t1 ? t1 : mEnd;
+  const el = document.createElement('div');
+  el.className = 'g-month';
+  el.style.left = pct(s) + '%';
+  el.style.width = ((diff(e,s)+1)/total*100) + '%';
+  el.textContent = (cur.getMonth()+1) + '월';
+  axis.appendChild(el);
+  cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+}
+for (let d = new Date(t0); d <= t1; d = new Date(d.getTime()+DAY)) {
+  if (d.getDay() === 1) {
+    const tk = document.createElement('div');
+    tk.className = 'g-tick';
+    tk.style.left = pct(d) + '%';
+    tk.textContent = d.getDate();
+    axis.appendChild(tk);
+  }
+}
+MILESTONES.forEach(m => {
+  const x = pct(D(m.date));
+  const dia = document.createElement('div');
+  dia.className = 'g-msdia';
+  dia.style.left = x + '%';
+  dia.title = `◆ ${m.label} — ${fmt(D(m.date))}`;
+  axis.appendChild(dia);
+  const dt = document.createElement('div');
+  dt.className = 'g-msdate';
+  dt.style.left = x + '%';
+  dt.textContent = mmdd(D(m.date));
+  dt.title = m.label;
+  axis.appendChild(dt);
+});
+
+/* ============== 간트: 배경 ============== */
+const bg = document.getElementById('gBg');
+for (let d = new Date(t0); d <= t1; d = new Date(d.getTime()+DAY)) {
+  if (d.getDay() === 6) {
+    const w = document.createElement('div');
+    w.className = 'g-weekend';
+    w.style.left = pct(d) + '%';
+    w.style.width = (Math.min(2, diff(t1,d)+1)/total*100) + '%';
+    bg.appendChild(w);
+  }
+  if (d.getDate() === 1 && diff(d, t0) !== 0) {
+    const ml = document.createElement('div');
+    ml.className = 'g-mline';
+    ml.style.left = pct(d) + '%';
+    bg.appendChild(ml);
+  }
+}
+MILESTONES.forEach(m => {
+  const line = document.createElement('div');
+  line.className = 'g-msline';
+  line.style.left = pct(D(m.date)) + '%';
+  line.title = `◆ ${m.label} — ${fmt(D(m.date))}`;
+  bg.appendChild(line);
+});
+const tp = pct(today);
+if (tp >= 0 && tp <= 100) {
+  const line = document.createElement('div');
+  line.className = 'g-tline';
+  line.style.left = tp + '%';
+  bg.appendChild(line);
+  const chip = document.createElement('div');
+  chip.className = 'g-tchip';
+  chip.style.left = tp + '%';
+  chip.textContent = `오늘 ${mmdd(today)}`;
+  bg.appendChild(chip);
+}
+
+/* ============== 간트: 행 ============== */
+const rows = document.getElementById('gRows');
+GROUPS.forEach(g => {
+  const gh = document.createElement('div');
+  gh.className = 'g-group';
+  gh.innerHTML = `<div>${g.title}</div><div></div>`;
+  rows.appendChild(gh);
+
+  g.tasks.forEach(t => {
+    const s = D(t.start), e = D(t.end);
+    const st = status(t, s, e);
+    const len = diff(e, s) + 1;
+    const single = len <= 1;
+    const prog = excluded(t) ? 0 : (actualOf(t) || 0);       // 실제 이행율(입력값)
+    const planned = excluded(t) ? null : plannedOf(t);        // 계획 예상 위치
+
+    const left = pct(s), width = len/total*100;
+    const dateTxt = single ? fmt(s) : `${mmdd(s)}–${mmdd(e)}`;
+    const after = (left + width) < 80;
+    const planLeft = (planned != null) ? (left + width * planned / 100) : 0;
+    const showPlan = (planned != null && planned > 0.5 && planned < 99.5 && !single);
+
+    const row = document.createElement('div');
+    row.className = 'g-row';
+    row.innerHTML = `
+      <div class="g-label">
+        <div class="g-name${t.sub ? ' sub' : ''}">${t.sub ? '└ ' : ''}${t.name}</div>
+        <div class="g-sub"${t.sub ? ' style="padding-left:14px"' : ''}>
+          <span class="chip ${st.cls}">${st.txt}</span>
+          ${t.owner ? `<span class="chip own">${t.owner}</span>` : ''}
+        </div>
+      </div>
+      <div class="g-track">
+        ${single
+          ? `<div class="mstone-pt" style="left:${left + width/2}%;--bc:${KC[t.kind]}" title="${t.name} · ${fmt(s)}"></div>
+             <span class="bar-dates" style="left:calc(${left + width/2}% + 12px)">${dateTxt}</span>`
+          : `<div class="bar${t.tbd ? ' tbdbar' : (t.conditional ? ' dashedbar' : '')}"
+                 style="left:${left}%;width:${width}%;--bc:${KC[t.kind]}"
+                 title="${t.name} · ${fmt(s)} – ${fmt(e)}">
+               ${(t.tbd||t.hold) ? '' : `<i class="fill" data-fill="${t.id}" style="width:${prog}%"></i>`}
+             </div>
+             ${showPlan ? `<div class="gantt-plan" data-plan="${t.id}" style="left:${planLeft}%" title="계획 예상 ${Math.round(planned)}%"></div>` : ''}
+             <span class="bar-dates" style="${after ? `left:calc(${left+width}% + 7px)` : `right:calc(${100-left}% + 7px)`}">${dateTxt}</span>`}
+      </div>`;
+    rows.appendChild(row);
+  });
+});
+
+/* ============== 핵심 마감 그리드 ============== */
+const msGrid = document.getElementById('msGrid');
+MILESTONES.slice().sort((a,b) => diff(D(a.date), D(b.date))).forEach(m => {
+  const md = D(m.date);
+  const n = diff(md, today);
+  const passed = n < 0;
+  const dcls = passed ? 'st-done' : (n <= 3 ? 'st-due' : (n <= 10 ? 'st-hold' : 'st-wait'));
+  const dtxt = n > 0 ? `D-${n}` : (n === 0 ? 'D-DAY' : `예정일 경과`);
+  const card = document.createElement('div');
+  card.className = 'ms-card' + (passed ? ' passed' : '');
+  card.innerHTML = `
+    <div class="ms-label">◆ ${m.label}</div>
+    <div class="ms-when"><b>${fmt(md)}</b><span class="chip ${dcls}">${dtxt}</span></div>`;
+  msGrid.appendChild(card);
+});
+
+/* ============== 상세 보드 (접이식 트랙 · 진척도 편집) ============== */
+const board = document.getElementById('board');
+GROUPS.forEach((g, gi) => {
+  const det = document.createElement('details');
+  det.className = 'trk';
+  if (gi < 2) det.open = true;
+  const sum = document.createElement('summary');
+  sum.innerHTML = `${g.title}<span class="cnt">${g.tasks.length}개 작업</span>`;
+  det.appendChild(sum);
+
+  const grid = document.createElement('div');
+  grid.className = 'task-grid';
+  g.tasks.forEach(t => {
+    const s = D(t.start), e = D(t.end);
+    const st = status(t, s, e);
+    const single = diff(e,s) <= 0;
+    const card = document.createElement('div');
+    card.className = `task-card ${t.kind}${t.sub ? ' subcard' : ''}`;
+    card.innerHTML = `
+      <div class="task-name">${t.sub ? '└ ' : ''}${t.name}</div>
+      <div class="task-top">
+        <span class="chip ${st.cls}">${st.txt}</span>
+        ${t.owner ? `<span class="chip own">담당 ${t.owner}</span>` : ''}
+      </div>
+      <div class="task-date ${t.kind}${t.tbd ? ' tbddate' : ''}">
+        ${single ? fmt(s) : `${fmt(s)} <span class="sep">→</span> ${fmt(e)}`}${t.tbd ? ' <span class="sep">· 가안</span>' : ''}
+      </div>
+      ${t.note ? `<div class="task-note">${t.note}</div>` : ''}`;
+
+    // 진척도 컨트롤
+    if (editable(t)) {
+      const v = Math.round(PROG[t.id] ?? 0);
+      const dt = deltaTag(actualOf(t) || 0, plannedOf(t) || 0);
+      const ctl = document.createElement('div');
+      ctl.className = 'prog-ctl';
+      ctl.innerHTML = `
+        <div class="prog-head">
+          <span class="prog-head-l">실제 이행율 <span class="prog-chip ${dt.cls}" data-chip="${t.id}">${dt.txt}</span></span>
+          <span class="prog-val" data-val="${t.id}">${v}%</span>
+        </div>
+        <input type="range" class="prog-range" data-id="${t.id}" min="0" max="100" step="5" value="${v}">
+        <div class="prog-presets">
+          <button type="button" data-id="${t.id}" data-v="0">0</button>
+          <button type="button" data-id="${t.id}" data-v="25">25</button>
+          <button type="button" data-id="${t.id}" data-v="50">50</button>
+          <button type="button" data-id="${t.id}" data-v="75">75</button>
+          <button type="button" data-id="${t.id}" data-v="100">완료</button>
+        </div>`;
+      card.appendChild(ctl);
+    } else if (hasKids(t)) {
+      const dt = deltaTag(actualOf(t) || 0, plannedOf(t) || 0);
+      const d = document.createElement('div');
+      d.className = 'prog-derived';
+      d.innerHTML = `<span>하위 작업 기준 이행율</span><b class="${dt.cls}" data-val="${t.id}">${Math.round(actualOf(t) || 0)}%</b>`;
+      card.appendChild(d);
+    } else {
+      const d = document.createElement('div');
+      d.className = 'prog-na';
+      d.textContent = '집계 제외 — 담당·일정 미정';
+      card.appendChild(d);
+    }
+
+    grid.appendChild(card);
+  });
+  det.appendChild(grid);
+  board.appendChild(det);
+});
+
+/* ============== 이행율 렌더 ============== */
+function renderPerf(){
+  const ag = aggregate();
+  const a = Math.round(ag.actual), p = Math.round(ag.planned);
+  const dt = deltaTag(ag.actual, ag.planned);
+  const dv = ag.actual - ag.planned;
+
+  document.getElementById('perfActual').textContent = a + '%';
+  document.getElementById('perfActual').className = 'ph-value ' + dt.cls;
+  document.getElementById('perfFill').style.width = ag.actual + '%';
+  const planEl = document.getElementById('perfPlan');
+  planEl.style.left = ag.planned + '%';
+  planEl.style.display = (ag.planned > 0.5 && ag.planned < 99.5) ? 'block' : 'none';
+
+  const deltaEl = document.getElementById('perfDelta');
+  deltaEl.className = 'ph-delta ' + dt.cls;
+  deltaEl.textContent = `${dt.txt} · 계획 대비 ${dv >= 0 ? '+' : ''}${dv.toFixed(0)}%p`;
+
+  document.getElementById('perfMeta').innerHTML =
+    `오늘까지 <b>계획 예상 ${p}%</b> · 현재 <b>실제 ${a}%</b> — 차이 <b class="${dt.cls}">${dv >= 0 ? '+' : ''}${dv.toFixed(0)}%p (${dt.txt})</b>`;
+
+  const tw = document.getElementById('perfTracks');
+  tw.innerHTML = '';
+  GROUPS.forEach((g, gi) => {
+    const ga = aggregate(t => t.gi === gi);
+    const row = document.createElement('div');
+    if (ga.count === 0) {
+      row.innerHTML = `
+        <div class="ptrk-top"><span>${g.title}</span><span class="ptrk-na">미정 · 집계 제외</span></div>
+        <div class="ptrk-bar"></div>`;
+    } else {
+      const gd = deltaTag(ga.actual, ga.planned);
+      row.innerHTML = `
+        <div class="ptrk-top">
+          <span>${g.title}</span>
+          <span class="ptrk-delta ${gd.cls}">${Math.round(ga.actual)}% <small>/ 계획 ${Math.round(ga.planned)}%</small></span>
+        </div>
+        <div class="ptrk-bar">
+          <div class="ptrk-fill" style="width:${ga.actual}%;background:${gd.cls==='pf-behind'?'var(--red)':(gd.cls==='pf-warn'?'var(--brass)':(gd.cls==='pf-ahead'?'var(--steel)':'var(--jade)'))}"></div>
+          <div class="ptrk-plan" style="left:${ga.planned}%;display:${(ga.planned>0.5&&ga.planned<99.5)?'block':'none'}"></div>
+        </div>`;
+    }
+    tw.appendChild(row);
+  });
+
+  document.getElementById('perfCount').textContent =
+    `집계 대상 ${ag.count}개 작업 (기간 가중) · 미정·대기 작업은 제외`;
+}
+
+/* ============== 편집 반영 (refresh) ============== */
+function refresh(){
+  document.querySelectorAll('[data-fill]').forEach(el => {
+    const t = TASK[el.dataset.fill];
+    el.style.width = (actualOf(t) || 0) + '%';
+  });
+  document.querySelectorAll('.prog-val[data-val]').forEach(el => {
+    el.textContent = Math.round(PROG[el.dataset.val] ?? 0) + '%';
+  });
+  document.querySelectorAll('.prog-derived b[data-val]').forEach(el => {
+    const t = TASK[el.dataset.val];
+    const dt = deltaTag(actualOf(t) || 0, plannedOf(t) || 0);
+    el.textContent = Math.round(actualOf(t) || 0) + '%';
+    el.className = dt.cls;
+  });
+  document.querySelectorAll('.prog-chip[data-chip]').forEach(el => {
+    const t = TASK[el.dataset.chip];
+    const dt = deltaTag(actualOf(t) || 0, plannedOf(t) || 0);
+    el.className = 'prog-chip ' + dt.cls;
+    el.textContent = dt.txt;
+  });
+  renderPerf();
+}
+
+/* 이벤트 위임 — 슬라이더 / 프리셋 버튼 */
+board.addEventListener('input', e => {
+  if (e.target.classList.contains('prog-range')) {
+    PROG[e.target.dataset.id] = +e.target.value;
+    saveProg();
+    refresh();
+  }
+});
+board.addEventListener('click', e => {
+  const b = e.target.closest('.prog-presets button');
+  if (!b) return;
+  const id = b.dataset.id;
+  PROG[id] = +b.dataset.v;
+  saveProg();
+  const r = board.querySelector(`.prog-range[data-id="${id}"]`);
+  if (r) r.value = PROG[id];
+  refresh();
+});
+document.getElementById('perfReset').addEventListener('click', () => {
+  if (!confirm('입력한 진척도를 모두 초기화할까요?')) return;
+  PROG = {};
+  saveProg();
+  board.querySelectorAll('.prog-range').forEach(r => r.value = 0);
+  refresh();
+});
+
+/* 초기 렌더 */
+refresh();
+</script>
+</body>
+</html>
